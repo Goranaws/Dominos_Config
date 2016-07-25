@@ -25,8 +25,47 @@ do
 		end
 	end
 
+	local function editBox_OnEditFocusGained(self)
+		self.prevValue = tonumber(self:GetText())
+	end
+
+    local function update(self, value)
+        local min, max = self:GetParent():GetMinMaxValues()
+
+        self:GetParent():SetValue(math.max(math.min(value, max), min))
+    end
+
+	local function editBox_OnEnterPressed(self)
+		local value = tonumber(self:GetText())
+
+		if value and value ~= self:GetParent():GetValue() then
+		    update(self, value)
+		else
+		    update(self, self.prevValue)
+		end
+	end
+
+    local function update(self, value)
+        local min, max = self:GetParent():GetMinMaxValues()
+
+        self:GetParent():SetValue(math.max(math.min(value, max), min))
+    end
+
+	local function editBox_OnEnterPressed(self)
+		local value = tonumber(self:GetText())
+
+		if value and value ~= self:GetParent():GetValue() then
+		    update(self, value)
+
+		else
+		    update(self, self.prevValue)
+		end
+		self:ClearFocus()
+	end
+
 	local function editBox_OnEscapePressed(self)
 		self:ClearFocus()
+		update(self, self.prevValue)
 	end
 
 	-- a hacky way to go to the next edit box
@@ -85,13 +124,16 @@ do
 		--todo: add edit option
 		local editBox = CreateFrame('EditBox', nil, f)
 		editBox:SetPoint('BOTTOMRIGHT', f, 'TOPRIGHT')
-		editBox:SetNumeric(false)
+		--editBox:SetNumeric(true)
 		editBox:SetAutoFocus(false)
 		editBox:SetFontObject('GameFontHighlightRight')
 		editBox:SetHeight(f.text:GetHeight())
 		editBox:SetWidth(f.text:GetHeight() * 3)
 		editBox:HighlightText(0, 0)
-		editBox:SetScript('OnTextChanged', editBox_OnTextChanged)
+		--editBox:SetScript('OnTextChanged', editBox_OnTextChanged)
+		editBox:SetScript('OnEnterPressed', editBox_OnEnterPressed)
+		
+		editBox:SetScript('OnEditFocusGained', editBox_OnEditFocusGained)
 		editBox:SetScript('OnEditFocusLost', editBox_OnEditFocusLost)
 		editBox:SetScript('OnEscapePressed', editBox_OnEscapePressed)
 		editBox:SetScript('OnTabPressed', editBox_OnTabPressed)
